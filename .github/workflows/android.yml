@@ -7,12 +7,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+      GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -Dfile.encoding=UTF-8" -Dkotlin.daemon.jvm.options="-Xmx2g"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Set up Java 17 (Temurin)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -29,19 +32,27 @@ jobs:
         run: |
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Install SDKMAN and Gradle
+      - name: Install SDKMAN and Gradle 8.7
         run: |
           curl -s "https://get.sdkman.io" | bash
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk install gradle 8.7
           gradle -v
 
+      - name: Verify Gradle & plugin resolution (diagnostic)
+        run: |
+          source "$HOME/.sdkman/bin/sdkman-init.sh"
+          gradle --version
+          echo "=== buildEnvironment ==="
+          gradle :app:buildEnvironment --no-daemon --stacktrace || true
+
       - name: Build Debug APK
         run: |
           source "$HOME/.sdkman/bin/sdkman-init.sh"
-          gradle clean :app:assembleDebug
+          gradle clean :app:assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK artifact
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
