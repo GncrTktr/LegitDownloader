@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="format_options">
+        <item>MP4 (indirilen olarak kaydet)</item>
+        <item>MP3 (FFmpeg ile dönüştür)</item>
+    </string-array>
+</resources>
