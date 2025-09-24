@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+      # Yeterli bellek ve düzgün encoding için
       GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -Dfile.encoding=UTF-8" -Dkotlin.daemon.jvm.options="-Xmx2g"
 
     steps:
@@ -39,11 +39,9 @@ jobs:
           sdk install gradle 8.7
           gradle -v
 
-      - name: Verify Gradle & plugin resolution (diagnostic)
+      - name: (Optional) Diagnose build environment
         run: |
           source "$HOME/.sdkman/bin/sdkman-init.sh"
-          gradle --version
-          echo "=== buildEnvironment ==="
           gradle :app:buildEnvironment --no-daemon --stacktrace || true
 
       - name: Build Debug APK
@@ -52,7 +50,6 @@ jobs:
           gradle clean :app:assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK artifact
-        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
